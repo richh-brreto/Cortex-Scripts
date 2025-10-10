@@ -1,12 +1,13 @@
 #!/bin/bash
 
-CHAVE="contoso"
+CHAVE="cortex"
 EXTENSAO_CHAVE=".pem"
 REGIAO="us-east-1"
 NOME_GRUPO="launch-dragon1"
 TIPO_INSTANCIA="t3.small"
 NOME_INSTANCIA="mysql-server"
 USER_DATA="./sfw.sh"
+IAM_ROLE="LabInstanceProfile"
 
 # checando o ID da VPC e colocando em variável
 echo "Pegando o ID da VPC..."
@@ -22,14 +23,16 @@ SUB_NET=$(aws ec2 describe-subnets \
 
 if [ -e "./$CHAVE$EXTENSAO_CHAVE" ]; then
   echo "O par de chaves $CHAVE já existe, usando o arquivo existente."
+  chmod 400 ./$CHAVE$EXTENSAO_CHAVE
   else
 # criação do par de chaves
 echo "Criando o par de chaves..."
+# caso apareça erro de par de chaves duplicada ou ja existente, verificar se o arquivo .pem já existe tanto localmente quanto na AWS
 aws ec2 create-key-pair \
   --key-name $CHAVE \
   --region $REGIAO \
   --query 'KeyMaterial' \
-  --output text > ./$CHAVE$EXTENSAO_CHAVE
+  --output text | sed 's/\r$//' > ./$CHAVE$EXTENSAO_CHAVE
 
 chmod 400 ./$CHAVE$EXTENSAO_CHAVE
 fi
@@ -88,6 +91,7 @@ aws ec2 run-instances \
 --instance-type $TIPO_INSTANCIA \
 --subnet-id $SUB_NET \
 --key-name $CHAVE \
+--iam-instance-profile Name="$IAM_ROLE" \
 --user-data file://$USER_DATA \
 --block-device-mappings \
 '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
