@@ -6,6 +6,7 @@ REGIAO="us-east-1"
 NOME_GRUPO="launch-dragon1"
 TIPO_INSTANCIA="t3.small"
 NOME_INSTANCIA="mysql-server"
+USER_DATA="scripts_projeto/sfw.sh"
 
 # checando o ID da VPC e colocando em variável
 echo "Pegando o ID da VPC..."
@@ -78,47 +79,6 @@ fi
 
 echo "Usando grupo de segurança: $SECURITY_ID"
 
-# script de inicialização da instância
-USER_DATA="""#!/bin/bash
-USER="sysadmin"
-SENHA="123"
-sudo apt-get update -y
-
-# configuração do usuário sysadmin
-
-sudo useradd -m -s /bin/bash $USER
-sudo mkdir -p /home/$USER/.ssh
-sudo cp /home/ubuntu/.ssh/authorized_keys /home/$USER/.ssh/authorized_keys
-sudo chown $USER:$USER /home/$USER/.ssh/authorized_keys
-sudo chmod 600 /home/$USER/.ssh/authorized_keys
-sudo chmod 700 /home/$USER/.ssh
-
-# instalação do MySQL, Node.js, Python e pip
-
-sudo apt update -y
-sudo apt install -y mysql-server
-sudo apt install -y nodejs npm
-sudo apt install -y python3 python3-pip
-
-# instalação do Docker e configuração do docker
-
-sudo apt-get install ca-certificates curl
-sudo install -m 0755 -d /etc/apt/keyrings
-sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-sudo chmod a+r /etc/apt/keyrings/docker.asc
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo groupadd docker
-sudo usermod -aG docker $USER
-newgrp docker
-sudo systemctl start docker
-sudo systemctl enable docker
-"""
-
 # criação das instâncias 
 echo "Criando a instância"
 aws ec2 run-instances \
@@ -128,7 +88,7 @@ aws ec2 run-instances \
 --instance-type $TIPO_INSTANCIA \
 --subnet-id $SUB_NET \
 --key-name $CHAVE \
---user-data "$USER_DATA" \
+--user-data file://$USER_DATA \
 --block-device-mappings \
 '[{"DeviceName":"/dev/sda1","Ebs":{"VolumeSize":20,"VolumeType":"gp3","DeleteOnTermination":true}}]' \
 --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value='"$NOME_INSTANCIA"'}]' \

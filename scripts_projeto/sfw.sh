@@ -1,32 +1,39 @@
 #!/bin/bash
 USER="sysadmin"
 SENHA="123"
+sudo apt-get update -y
 
-echo "Criando um novo $USER"
+# configuração do usuário sysadmin
 sudo useradd -m -s /bin/bash $USER
-echo "$USER:$SENHA" | sudo chpasswd
-
-# dando permissão ssh
 sudo mkdir -p /home/$USER/.ssh
 sudo cp /home/ubuntu/.ssh/authorized_keys /home/$USER/.ssh/authorized_keys
 sudo chown $USER:$USER /home/$USER/.ssh/authorized_keys
 sudo chmod 600 /home/$USER/.ssh/authorized_keys
 sudo chmod 700 /home/$USER/.ssh
-echo "Permissão ssh concedida"
 
-# atualizando e baixando pacotes
-echo "Atualizando pacotes"
+# instalação do MySQL, Node.js, Python e pip
 sudo apt update -y
-
-echo "Instalando MySql"
 sudo apt install -y mysql-server
-
-echo "Instalando NodeJs e npm"
 sudo apt install -y nodejs npm
-
-echo "Instalando Python e Pip"
 sudo apt install -y python3 python3-pip
 
-echo "Ambiente configurado."
+# instalação do Docker e configuração do docker
+sudo apt-get install ca-certificates curl
+sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
 
-# 
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+# adicionando o usuário ao grupo docker
+sudo groupadd docker
+sudo usermod -aG docker $USER
+newgrp docker
+# iniciando e habilitando o docker
+sudo systemctl start docker
+sudo systemctl enable docker
