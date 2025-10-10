@@ -1,7 +1,7 @@
 #!/bin/bash
 USER="sysadmin"
 SENHA="123"
-sudo apt-get update -y
+sudo apt update && sudo apt upgrade -y
 
 # configuração do usuário sysadmin
 sudo useradd -m -s /bin/bash $USER
@@ -18,6 +18,7 @@ sudo apt install -y nodejs npm
 sudo apt install -y python3 python3-pip
 
 # instalação do Docker e configuração do docker
+sudo apt-get update -y
 sudo apt-get install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
@@ -37,3 +38,9 @@ newgrp docker
 # iniciando e habilitando o docker
 sudo systemctl start docker
 sudo systemctl enable docker
+
+# instalação do AWS CLI
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+sudo apt install unzip -y
+unzip awscliv2.zip
+sudo ./aws/install
