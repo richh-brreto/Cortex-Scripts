@@ -6,7 +6,7 @@ REGIAO="us-east-1"
 NOME_GRUPO="launch-dragon1"
 TIPO_INSTANCIA="t3.small"
 NOME_INSTANCIA="mysql-server"
-USER_DATA="scripts_projeto/sfw.sh"
+USER_DATA="./sfw.sh"
 
 # checando o ID da VPC e colocando em variável
 echo "Pegando o ID da VPC..."
