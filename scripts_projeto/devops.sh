@@ -5,7 +5,7 @@ EXTENSAO_CHAVE=".pem"
 REGIAO="us-east-1"
 NOME_GRUPO="launch-dragon1"
 TIPO_INSTANCIA="t3.small"
-NOME_INSTANCIA="mysql-server"
+NOME_INSTANCIA="cortex-server"
 USER_DATA="./sfw.sh"
 IAM_ROLE="LabInstanceProfile"
 
@@ -77,6 +77,12 @@ else
     --group-id $SECURITY_ID \
     --protocol tcp \
     --port 3306 \
+    --cidr 0.0.0.0/0
+
+    aws ec2 authorize-security-group-ingress \
+    --group-id $SECURITY_ID \
+    --protocol tcp \
+    --port 3333 \
     --cidr 0.0.0.0/0
 fi
 

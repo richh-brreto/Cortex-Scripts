@@ -11,15 +11,9 @@ sudo chown $USER:$USER /home/$USER/.ssh/authorized_keys
 sudo chmod 600 /home/$USER/.ssh/authorized_keys
 sudo chmod 700 /home/$USER/.ssh
 
-# instalação do MySQL, Node.js, Python e pip
-sudo apt update -y
-sudo apt install -y mysql-server
-sudo apt install -y nodejs npm
-sudo apt install -y python3 python3-pip
-
 # instalação do Docker e configuração do docker
-sudo apt-get update -y
-sudo apt-get install ca-certificates curl
+sudo apt-get update
+sudo apt-get install -y ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
 sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
 sudo chmod a+r /etc/apt/keyrings/docker.asc
@@ -30,7 +24,7 @@ echo \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 
 sudo apt-get update
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 # adicionando o usuário ao grupo docker
 sudo groupadd docker
 sudo usermod -aG docker $USER
@@ -44,3 +38,27 @@ curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip
 sudo apt install unzip -y
 unzip awscliv2.zip
 sudo ./aws/install
+
+# Arquivo do Docker Compose
+cat <<EOF > /home/$USER/docker-compose.yml
+services:
+  site-web: 
+    image: richbrreto/site-web:latest
+    ports: 
+      - "8080:8080"
+    networks:
+      - rede-cortex
+    depends_on:
+      - cortex-db
+
+  cortex-db:
+    image: richbrreto/cortex-db-sprint2:cortex-db2
+    ports:
+      - "3306:3306"
+    networks:
+      - rede-cortex
+
+networks:
+  rede-cortex:
+    driver: bridge
+EOF
